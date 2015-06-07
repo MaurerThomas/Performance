@@ -1,7 +1,5 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 
 
 /**
@@ -55,6 +53,29 @@ public class DatabaseAccessObject {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+    public ArrayList<String> readString(String sql, Connection connection) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        ArrayList<String> strings = new ArrayList<String>();
+        try {
+            stmt = connection.prepareStatement(sql);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                strings.add(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                stmt.close();
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return strings;
     }
 
 }

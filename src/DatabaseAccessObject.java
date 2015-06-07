@@ -3,23 +3,23 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+
 /**
  * Created by Thomas on 6-6-2015.
  */
 public class DatabaseAccessObject {
 
-    private String url = "";
-    private String dbName = "";
-    private String driver = "com.mysql.jdbc.Driver";
-    private String userName = "";
-    private String password = "";
-
+    private String url = "jdbc:postgresql://localhost:5432";
+    private String dbName = "postgres";
+    private String driver = "org.postgresql.Driver";
+    private String userName = "postgres";
+    private String password = "root";
 
     public Connection connect() {
         try {
             Class.forName(driver).newInstance();
             Connection connection;
-            connection = DriverManager.getConnection(url + dbName, userName, password);
+            connection = DriverManager.getConnection(url + "/"+ dbName, userName, password);
             connection.setAutoCommit(false);
             connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             return connection;

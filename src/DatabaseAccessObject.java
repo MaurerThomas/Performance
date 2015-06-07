@@ -11,7 +11,7 @@ public class DatabaseAccessObject {
     private String dbName = "postgres";
     private String driver = "org.postgresql.Driver";
     private String userName = "postgres";
-    private String password = "root";
+    private String password = "wouter";
 
     public Connection connect() {
         try {
@@ -76,6 +76,37 @@ public class DatabaseAccessObject {
             }
         }
         return strings;
+    }
+    public ArrayList<String[]> readMultiString(String sql, Connection connection) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        ArrayList<String[]> list = new ArrayList<String[]>();
+        try {
+            stmt = connection.prepareStatement(sql);
+            rs = stmt.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+
+
+            while (rs.next()) {
+
+                int columnsNumber = rsmd.getColumnCount();
+                String[] temp = new String[columnsNumber];
+                for (int i = 0; i < columnsNumber; i++) {
+                    temp[i] = rs.getString(i+1);
+                }
+                list.add(temp);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                stmt.close();
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
     }
 
 }

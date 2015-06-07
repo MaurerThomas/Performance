@@ -1,4 +1,6 @@
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by Thomas on 7-6-2015.
@@ -9,7 +11,7 @@ public class UserRequestData {
     DatabaseAccessObject dao = new DatabaseAccessObject();
     public static final int MAX_RUNS = 600;
 
-    Connection connection = dao.connect();
+
     public static void main(String[] args) {
         startThread("1");
         startThread("2");
@@ -27,14 +29,14 @@ public class UserRequestData {
     }
 
     public UserRequestData() {
-        getAllStudents();
-
-        int counter = 0;
+        System.out.println("---------------------------------------------");
         Connection connection = dao.connect();
-        long duurtotaal = 0;
+        int counter = 0;
+        float duurtotaal = 0;
         while (counter < MAX_RUNS) {
+            String[] student = getRandomStudent(connection);
             long beginTijd = System.currentTimeMillis();
-
+            ArrayList<String> list = getStudentModules(student[0],student[1],connection);
 
             // Doe je ding
 
@@ -53,6 +55,7 @@ public class UserRequestData {
         }
         dao.disconnect(connection);
         System.out.println((duurtotaal / MAX_RUNS));
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
     }
 
 
@@ -60,10 +63,21 @@ public class UserRequestData {
         String query = "Select voornaam, achternaam FROM studenten LIMIT 1";
 
     }
+    public String[] getRandomStudent(Connection connection){
+        String query = "Select voornaam,achternaam FROM studenten";
+        ArrayList<String[]> list = dao.readMultiString(query, connection);
+        return list.get(ThreadLocalRandom.current().nextInt(list.size()));
 
-    public void getStudentModules(String voornaam, String achternaam){
-        String query = "";
+    }
 
+    public ArrayList<String> getStudentModules(String voornaam, String achternaam, Connection connection){
+        String query = "Select modulecode " +
+                "From modules " +
+                "Join module_klassen ON modules.modulecode = module_klassen.module " +
+                "Join student_klassen ON module_klassen.klas = student_klassen.klas " +
+                "Join studenten ON student_klassen.student = studenten.studentnummer " +
+                "WHERE voornaam = '"+voornaam+"' AND achternaam = '"+achternaam+"';";
+        return dao.readString(query,connection);
     }
 
 

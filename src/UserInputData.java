@@ -13,14 +13,13 @@ public class UserInputData {
     public UserInputData(){
         int counter = 0;
         Connection connection = dao.connect();
-        long duurtotaal = 0;
+        float duurtotaal = 0;
         while(counter < MAX_RUNS){
             long beginTijd = System.currentTimeMillis();
             String voornaam =  ThreadLocalRandom.current().nextInt(9999999)+"";
             String studentNummer = String.format("%07d",ThreadLocalRandom.current().nextInt(9999999));
             StringBuilder nummer = new StringBuilder(studentNummer);
             nummer.setCharAt(0, '1');
-            System.err.println(studentNummer);
             String achternaam = ThreadLocalRandom.current().nextInt(9999999)+"";
             addStudent(nummer,voornaam,achternaam,connection);
             if(ThreadLocalRandom.current().nextInt(30) == 1){

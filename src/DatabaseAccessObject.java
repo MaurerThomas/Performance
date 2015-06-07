@@ -13,7 +13,7 @@ public class DatabaseAccessObject {
     private String dbName = "postgres";
     private String driver = "org.postgresql.Driver";
     private String userName = "postgres";
-    private String password = "root";
+    private String password = "wouter";
 
     public Connection connect() {
         try {

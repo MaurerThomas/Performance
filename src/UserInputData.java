@@ -1,17 +1,13 @@
 import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by Wouter on 6/7/2015.
  */
 public class UserInputData {
     DatabaseAccessObject dao = new DatabaseAccessObject();
-    Random random = new Random();
+
     public static final int MAX_RUNS = 600;
     public static ArrayList<String> klassen = new ArrayList<String>();
     public UserInputData(){
@@ -20,22 +16,27 @@ public class UserInputData {
         long duurtotaal = 0;
         while(counter < MAX_RUNS){
             long beginTijd = System.currentTimeMillis();
-            String student = String.format("%07d", random.nextInt(9999999));
-            addStudent(student,connection);
-            if(random.nextInt(30) == 1){
-                String klas = "klas"+random.nextInt(Integer.MAX_VALUE);
+            String voornaam =  ThreadLocalRandom.current().nextInt(9999999)+"";
+            String studentNummer = String.format("%07d",ThreadLocalRandom.current().nextInt(9999999));
+            StringBuilder nummer = new StringBuilder(studentNummer);
+            nummer.setCharAt(0, '1');
+            System.err.println(studentNummer);
+            String achternaam = ThreadLocalRandom.current().nextInt(9999999)+"";
+            addStudent(nummer,voornaam,achternaam,connection);
+            if(ThreadLocalRandom.current().nextInt(30) == 1){
+                String klas = "KLAS"+ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
                 addKlas(klas,connection);
             }
-            if(klassen != null){
-                addStudentToKlas(student,klassen.get(random.nextInt(klassen.size())),connection);
+            if(klassen.size() > 0){
+                addStudentToKlas(nummer,klassen.get(ThreadLocalRandom.current().nextInt(klassen.size())),connection);
             }
-            if(random.nextInt(30) == 1){
-                String module = "module"+random.nextInt(Integer.MAX_VALUE);
+            if(ThreadLocalRandom.current().nextInt(30) == 1){
+                String module = "module"+ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
                 addModule(module,connection);
-                if(klassen != null){
-                    for(int i = 0; i < klassen.size(); i++) {
-                        if (random.nextInt((int) (100 * 0.15)) == 1) {
-                            addKlasToModule(klassen.get(i),module,connection);
+                if(klassen.size() > 0){
+                    for (String aKlassen : klassen) {
+                        if (ThreadLocalRandom.current().nextInt((int) (100 * 0.15)) == 1) {
+                            addKlasToModule(aKlassen, module, connection);
                         }
                     }
                 }
@@ -56,26 +57,21 @@ public class UserInputData {
         System.out.println((duurtotaal/MAX_RUNS));
     }
 
-    public void addStudent(String name,Connection connection){
-        String query = "Insert into";
-        // insert als niet bestaat
+    public void addStudent(StringBuilder nummer,String achternaam, String name,Connection connection){
+        String query = "Insert into studenten(studentnummer, voornaam, achternaam) VALUES ('"+nummer+"','"+name+"','"+achternaam+"')";
+        dao.update(query,connection);
+
     }
     public void addKlas(String name,Connection connection){
-        // check of klas bestaat
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        //get current date time with Date()
-        Date date = new Date();
-        String query = "Insert into klassen(naam, startdatum,einddatum) VALUES("+name+","+0+","+dateFormat.format(date)+")";
+        String query = "Insert into klassen(naam) VALUES('"+name+"')";
         if(searchList(name,klassen)){
             klassen.add(name);
             dao.update(query,connection);
         }
-
-        // zo niet maak
     }
     public boolean searchList(String x, ArrayList<String> list){
-        for(int i =0; i<list.size();i++){
-            if(list.get(i).equals(x)){
+        for (String aList : list) {
+            if (aList.equals(x)) {
                 return false;
             }
         }
@@ -83,21 +79,20 @@ public class UserInputData {
 
     }
     public void addModule(String name,Connection connection){
+        String query = "insert into modules(modulecode) VALUES ('"+name+"')";
+        dao.update(query,connection);
 
     }
     public void addKlasToModule(String klas,String module,Connection connection){
+        String query = "insert into module_klassen(module,klas) VALUES('"+module+"','"+klas+"')";
+        dao.update(query,connection);
 
     }
-    public void addStudentToKlas(String student, String klas,Connection connection){
+    public void addStudentToKlas(StringBuilder student, String klas,Connection connection){
+        String query = "insert into student_klassen(student,klas) VALUES('"+student+"','"+klas+"')";
+        dao.update(query,connection);
 
     }
-    public ArrayList<String> getKlassen(Connection connection){
-        String query = "Select naam From klassen";
-
-        ArrayList<String> aantal = dao.readString(query, connection);
-        return aantal;
-    }
-
     public static void main(String[] args) {
         startThread("1");
         startThread("2");

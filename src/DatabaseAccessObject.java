@@ -11,7 +11,7 @@ public class DatabaseAccessObject {
     private String dbName = "postgres";
     private String driver = "org.postgresql.Driver";
     private String userName = "postgres";
-    private String password = "wouter";
+    private String password = "root";
 
     public Connection connect() {
         try {
